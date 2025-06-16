@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>El Collar Mágico de Gandalf</title>
+  <!-- Carga la librería SweetAlert2 para mostrar mensajes bonitos -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    /* Estilos generales del cuerpo de la página */
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f0f0f0;
+    }
+    
+    /* Contenedor del collar */
+    .collar-container {
+      display: grid;
+      justify-content: center;
+      grid-template-columns: repeat(auto-fill, 24px);
+      gap: 4px;
+      margin: 20px auto;
+      width: fit-content;
+      max-width: 90vw;
+    }
+
+    /* Estilo de cada perla */
+    .perla {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+      border: 1px solid #000;
+    }
+
+    /* Perla actual en primera posición */
+    .transform {
+      outline: 3px solid red;
+    }
+
+    /* Contenedor de los controles */
+    .controls {
+      margin: 20px;
+    }
+
+    /* Caja de información del juego */
+    .info {
+      margin: 10px auto;
+      width: fit-content;
+      padding: 8px;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    /* Contador de toques */
+    .contador {
+      font-weight: bold;
+      font-size: 20px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Título del juego -->
+  <h1>El Collar Mágico de Gandalf</h1>
+
+  <!-- Sección de controles de entrada del usuario -->
+  <div class="controls">
+    <label for="cantidad">Cantidad de perlas (2–10000): </label>
+    <input type="number" id="cantidad" min="2" max="10000" value="100" />
+
+    <label for="blancas">Posiciones de las perlas blancas (separadas por coma): </label>
+    <input type="text" id="blancas" placeholder="e.g. 100,120,640" />
+
+    <label for="avance">Movimientos por clic: </label>
+    <input type="number" id="avance" min="1" max="10000" value="1" />
+
+    <label for="colorPickerNegra">Color de perlas negras: </label>
+    <input type="color" id="colorPickerNegra" value="#000000" />
+
+    <label for="colorPickerBlanca">Color de perlas blancas: </label>
+    <input type="color" id="colorPickerBlanca" value="#ffffff" />
+
+    <label><input type="checkbox" id="autoCheckbox" /> Automático</label>
+
+    <label for="velocidad">Velocidad (ms): </label>
+    <input type="number" id="velocidad" min="10" value="200" />
+
+    <!-- Botones de iniciar y reiniciar -->
+    <button id="iniciar">Iniciar</button>
+    <button id="detener">Reiniciar</button>
+  </div>
+
+  <!-- Mensaje explicativo -->
+  <div class="info">Haz clic o mantén presionado para avanzar el collar</div>
+  <div class="contador">Gandalf ha tocado el collar <span id="contador">0</span> veces</div>
+
+  <!-- Contenedor del collar donde se renderizan las perlas -->
+  <div class="collar-container" id="collar"></div>
+
+  <script>
+    // Variables del juego
+    let perlas = [], iniciado = false, presionado = false;
+    let intervaloAuto = null, intervaloManual = null;
+    let contadorToques = 0;
+
+    // Referencias a los elementos del DOM
+    const collar = document.getElementById("collar");
+    const iniciarBtn = document.getElementById("iniciar");
+    const detenerBtn = document.getElementById("detener");
+    const cantidadInput = document.getElementById("cantidad");
+    const blancasInput = document.getElementById("blancas");
+    const avanceInput = document.getElementById("avance");
+    const colorPickerNegra = document.getElementById("colorPickerNegra");
+    const colorPickerBlanca = document.getElementById("colorPickerBlanca");
+    const autoCheckbox = document.getElementById("autoCheckbox");
+    const velocidadInput = document.getElementById("velocidad");
+    const contadorSpan = document.getElementById("contador");
+
+    // Muestra las reglas del juego al cargar la página
+    window.onload = () => {
+      Swal.fire({
+        title: 'Reglas del Juego',
+        html: `<p><strong>Objetivo:</strong> Lograr que todas las perlas del collar se vuelvan blancas.<br><br>
+        - Hay n perlas, todas negras salvo las indicadas como blancas.<br>
+        - Cada vez que haces clic, todas las perlas se mueven una posición a la izquierda.<br>
+        - Si la perla que llega a la posición 1 es blanca, la última se vuelve blanca automáticamente.<br><br>
+        <strong>Estrategia:</strong><br>
+        Cada vez que una blanca llega a la posición 1, crea otra blanca. El blanco se propaga.<br><br>
+        <em>¡Logra que todas sean blancas!</em></p>`,
+        icon: 'info',
+        confirmButtonText: '¡Jugar!'
+      });
+    };
+
+    // Evento para iniciar el juego
+    iniciarBtn.addEventListener("click", () => {
+      const n = parseInt(cantidadInput.value);
+      const blancasStr = blancasInput.value.trim();
+      const posicionesBlancas = blancasStr ? blancasStr.split(',').map(x => parseInt(x.trim()) - 1).filter(x => x >= 0 && x < n) : [];
+
+      if (n < 2 || n > 10000) {
+        Swal.fire("Error", "Cantidad inválida de perlas.", "error");
+        return;
+      }
+
+      // Inicializa el juego
+      iniciado = true;
+      iniciarBtn.disabled = true;
+      detenerBtn.disabled = false;
+      cantidadInput.disabled = true;
+      blancasInput.disabled = true;
+      avanceInput.disabled = false;
+
+      // Crea el arreglo de perlas
+      perlas = Array(n).fill("negra");
+      posicionesBlancas.forEach(pos => perlas[pos] = "blanca");
+      contadorToques = 0;
+      actualizarContador();
+      renderCollar();
+    });
+
+    // Botón para recargar la página y reiniciar el juego
+    detenerBtn.addEventListener("click", () => location.reload());
+
+    // Función para avanzar el collar
+    function avanzarCollar(pasos) {
+      const maxToques = (perlas.length - 1) ** 2;
+
+      // Verifica si se alcanzó el máximo de toques
+      if (contadorToques + pasos > maxToques) {
+        Swal.fire("Límite alcanzado", `Máximo de ${maxToques} toques permitidos.`, "warning");
+        clearInterval(intervaloAuto);
+        clearInterval(intervaloManual);
+        iniciado = false;
+        return;
+      }
+
+      // Mueve las perlas "pasos" veces
+      for (let i = 0; i < pasos; i++) {
+        const primera = perlas.shift();
+        perlas.push(primera);
+        if (perlas[0] === "blanca") perlas[perlas.length - 1] = "blanca";
+      }
+
+      contadorToques += pasos;
+      actualizarContador();
+      renderCollar();
+
+      // Verifica condiciones de victoria o derrota
+      if (perlas.every(p => p === "blanca")) {
+        iniciado = false;
+        clearInterval(intervaloAuto);
+        clearInterval(intervaloManual);
+        Swal.fire("¡Éxito!", "¡Todas las perlas son blancas!", "success");
+        return;
+      }
+
+      if (contadorToques === maxToques && !perlas.every(p => p === "blanca")) {
+        iniciado = false;
+        clearInterval(intervaloAuto);
+        clearInterval(intervaloManual);
+        Swal.fire("Fin del juego", "Se alcanzó el número máximo de toques y no todas las perlas son blancas.", "error");
+      }
+    }
+
+    // Renderiza el collar visualmente
+    function renderCollar() {
+      collar.innerHTML = "";
+      perlas.forEach((color, i) => {
+        const p = document.createElement("div");
+        p.className = "perla";
+        if (i === 0) p.classList.add("transform");
+        p.style.backgroundColor = color === "blanca" ? colorPickerBlanca.value : colorPickerNegra.value;
+        collar.appendChild(p);
+      });
+    }
+
+    // Actualiza el contador visual
+    function actualizarContador() {
+      contadorSpan.textContent = contadorToques;
+    }
+
+    // Evento para mantener presionado el mouse y avanzar
+    document.addEventListener("mousedown", e => {
+      if (!iniciado || autoCheckbox.checked || e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
+      presionado = true;
+      const pasos = parseInt(avanceInput.value) || 1;
+      avanzarCollar(pasos);
+      setTimeout(() => {
+        if (presionado) {
+          intervaloManual = setInterval(() => {
+            if (presionado) avanzarCollar(pasos);
+          }, 100);
+        }
+      }, 300);
+    });
+
+    // Detiene el avance al soltar el mouse o salir de la ventana
+    document.addEventListener("mouseup", () => {
+      presionado = false;
+      clearInterval(intervaloManual);
+    });
+
+    document.addEventListener("mouseleave", () => {
+      presionado = false;
+      clearInterval(intervaloManual);
+    });
+
+    // Control de modo automático (avanza solo)
+    autoCheckbox.addEventListener("change", () => {
+      clearInterval(intervaloAuto);
+      if (autoCheckbox.checked && iniciado) {
+        const pasos = parseInt(avanceInput.value) || 1;
+        const velocidad = parseInt(velocidadInput.value) || 200;
+        intervaloAuto = setInterval(() => avanzarCollar(pasos), velocidad);
+      }
+    });
+  </script>
+</body>
+</html>
+
+

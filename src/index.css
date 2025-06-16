@@ -1,0 +1,49 @@
+body {
+  background: #f0f0f0;
+}
+
+.collar-container {
+  display: grid;
+  justify-content: center;
+  grid-template-columns: repeat(auto-fill, 24px);
+  gap: 4px;
+  margin: 20px auto;
+  width: fit-content;
+  max-width: 90vw;
+}
+
+.perla {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+  border: 1px solid #000;
+}
+
+/* .transform {
+      outline: 3px solid red;
+    } */
+
+html {
+  /* Establecer el modelo de caja para todos los elementos */
+  box-sizing: border-box;
+}
+
+.box.is-flex.is-justify-content-center {
+  /* Alto completo */
+  height: 100%;
+}
+
+.box {
+  height: 100%;
+}
+
+body::-webkit-scrollbar {
+  /* Ocultar la barra de desplazamiento */
+  display: none;
+}
+
+.cursor-pointer {
+  cursor: progress;
+  user-select: none;
+}

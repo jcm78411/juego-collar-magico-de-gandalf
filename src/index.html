@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>El Collar Mágico de Gandalf</title>
+
+  <!-- SweetAlert2 -->
+  <script src="../js/sweetalert.js"></script>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="../css/bulma.min.css">
+  <link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+  <section class="section">
+    <div class="container has-text-centered">
+      <h1 class="title is-3">El Collar Mágico de Gandalf</h1>
+
+      <div class="box">
+        <div class="columns is-multiline is-variable is-2">
+          <!-- Cantidad de perlas -->
+          <div class="column is-6">
+            <div class="field">
+              <label class="label" for="cantidad">Cantidad de perlas (2-10000)</label>
+              <div class="control">
+                <input class="input" type="number" id="cantidad" min="2" max="10000" value="100">
+              </div>
+            </div>
+          </div>
+
+          <!-- Posiciones blancas -->
+          <div class="column is-6">
+            <div class="field">
+              <label class="label" for="blancas">Posiciones de perlas blancas (coma)</label>
+              <div class="control">
+                <input class="input" type="text" id="blancas" placeholder="e.g. 100,120,640">
+              </div>
+            </div>
+          </div>
+
+          <!-- Avance -->
+          <div class="column is-4">
+            <div class="field">
+              <label class="label" for="avance">Movimientos por clic</label>
+              <div class="control">
+                <input class="input" type="number" id="avance" min="1" max="10000" value="1">
+              </div>
+            </div>
+          </div>
+
+          <!-- Color negra -->
+          <div class="column is-4">
+            <div class="field">
+              <label class="label" for="colorPickerNegra">Color de perlas negras</label>
+              <div class="control">
+                <input class="input" type="color" id="colorPickerNegra" value="#000000">
+              </div>
+            </div>
+          </div>
+
+          <!-- Color blanca -->
+          <div class="column is-4">
+            <div class="field">
+              <label class="label" for="colorPickerBlanca">Color de perlas blancas</label>
+              <div class="control">
+                <input class="input" type="color" id="colorPickerBlanca" value="#ffffff">
+              </div>
+            </div>
+          </div>
+
+          <!-- Automático y velocidad -->
+          <div class="column is-6">
+            <div class="field is-grouped is-align-items-center">
+              <div class="control">
+                <label class="checkbox">
+                  <input type="checkbox" id="autoCheckbox"> Automático
+                </label>
+              </div>
+              <div class="control ml-3">
+                <label class="label" for="velocidad">Velocidad (ms)</label>
+                <input class="input" type="number" id="velocidad" min="10" value="200">
+              </div>
+            </div>
+          </div>
+
+          <!-- Botones -->
+          <div class="column is-6">
+            <div class="field is-grouped is-justify-content-center">
+              <div class="control">
+                <button class="button is-success" id="iniciar">Iniciar</button>
+              </div>
+              <div class="control">
+                <button class="button is-danger" id="detener">Reiniciar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Info y contador -->
+      <div class="notification is-info is-light cursor-pointer">
+        Haz clic o mantén presionado para avanzar el collar
+      </div>
+
+
+      <p class="has-text-weight-bold is-size-5 mb-5">
+        Gandalf ha tocado el collar <span id="contador">0</span> veces
+      </p>
+
+      <!-- Contenedor del collar -->
+      <div class="collar-container" id="collar"></div>
+    </div>
+  </section>
+
+  <script src="renderer.js"></script>
+</body>
+
+</html>
