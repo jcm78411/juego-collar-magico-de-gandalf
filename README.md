@@ -34,7 +34,11 @@ Este proyecto simula un collar circular compuesto por perlas **negras y blancas*
    ```bash
    git clone https://github.com/jcm78411/el-collar-de-gandalf.git
    ```
-
+2. Ubicate en la carpeta:
+   ```bash
+   cd juego-collar-magico-de-gandalf
+   ```
+   
 2. Instala las dependencias:
    ```bash
    npm install
