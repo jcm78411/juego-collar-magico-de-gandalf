@@ -32,7 +32,7 @@ Este proyecto simula un collar circular compuesto por perlas **negras y blancas*
 
 1. Clona este repositorio:
    ```bash
-   git clone https://github.com/jcm78411/el-collar-de-gandalf.git
+   git clone https://github.com/jcm78411/juego-collar-magico-de-gandalf.git
    ```
 2. Ubicate en la carpeta:
    ```bash
