@@ -63,8 +63,6 @@
       if (autoCheckbox.checked) {
         const velocidad = parseInt(velocidadInput.value) || 200;
         intervaloAuto = setInterval(() => avanzarCollar(pasos), velocidad);
-      } else {
-        avanzarCollar(pasos); // opcional para ver un primer movimiento
       }
     });
 
